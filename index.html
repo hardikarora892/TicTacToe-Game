@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to right, #2193b0, #6dd5ed);
+            color: #fff;
+        }
+
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 10px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            font-size: 2em;
+            text-align: center;
+            line-height: 100px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            color: #333;
+        }
+
+        .cell:hover {
+            background-color: #f0f0f0;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #fff;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .modal {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px;
+            font-size: 1em;
+            background-color: #2193b0;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="board"></div>
+    <div class="overlay" id="overlay">
+        <div class="modal">
+            <div class="message" id="modalMessage"></div>
+            <button onclick="resetGame()">New Game</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const board = document.getElementById("board");
+            const overlay = document.getElementById("overlay");
+            const modalMessage = document.getElementById("modalMessage");
+            let currentPlayer = "X";
+            let boardState = ["", "", "", "", "", "", "", "", ""];
+
+            // Create cells
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement("div");
+                cell.classList.add("cell");
+                cell.addEventListener("click", () => handleCellClick(i));
+                board.appendChild(cell);
+            }
+
+            // Handle cell click
+            function handleCellClick(index) {
+                if (boardState[index] === "" && !checkWinner()) {
+                    boardState[index] = currentPlayer;
+                    renderBoard();
+                    if (checkWinner()) {
+                        showModal(`${currentPlayer} wins!`);
+                    } else if (boardState.every((cell) => cell !== "")) {
+                        showModal("It's a tie!");
+                    } else {
+                        currentPlayer = currentPlayer === "X" ? "O" : "X";
+                    }
+                }
+            }
+
+            // Show modal with message
+            function showModal(message) {
+                modalMessage.textContent = message;
+                overlay.style.display = "flex";
+            }
+
+            // Check for a winner
+            function checkWinner() {
+                const winPatterns = [
+                    [0, 1, 2],
+                    [3, 4, 5],
+                    [6, 7, 8],
+                    [0, 3, 6],
+                    [1, 4, 7],
+                    [2, 5, 8],
+                    [0, 4, 8],
+                    [2, 4, 6],
+                ];
+
+                for (const pattern of winPatterns) {
+                    const [a, b, c] = pattern;
+                    if (boardState[a] !== "" && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+                        highlightWinnerCells([a, b, c]);
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            // Highlight cells that make up the winning line
+            function highlightWinnerCells(cells) {
+                for (const cellIndex of cells) {
+                    board.children[cellIndex].style.backgroundColor = "#8eff8e";
+                }
+            }
+
+            // Render the current state of the board
+            function renderBoard() {
+                boardState.forEach((value, index) => {
+                    board.children[index].textContent = value;
+                    board.children[index].style.backgroundColor = "#fff";
+                });
+            }
+
+            // Reset the game
+            window.resetGame = function () {
+                boardState = ["", "", "", "", "", "", "", "", ""];
+                currentPlayer = "X";
+                renderBoard();
+                overlay.style.display = "none";
+                modalMessage.textContent = "";
+            };
+        });
+    </script>
+</body>
+</html>
